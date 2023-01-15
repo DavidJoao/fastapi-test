@@ -15,7 +15,7 @@ class Person(BaseModel):
 
 
 with open('data/people.json', 'r') as f:
-    people = json.load(f)['people']
+    people = json.load(f)
 
 # Routes
 @app.get('/')
@@ -23,6 +23,37 @@ def show_people():
     return (people)
 
 
+## Post a person
+@app.post('/addPerson', status_code=201)
+def add_person( person: Person):
+    p_id = max([p['id'] for p in people]) + 1
+    new_person = {
+        "id": p_id,
+        "name": person.name,
+        "age": person.age,
+        "gender": person.gender 
+    }
+
+    people.append(new_person)
+
+    with open('data/people.json', 'w') as f:
+        json.dump(people, f)
+
+    return new_person
+
+
+## Delete a Person
+@app.delete('/deletePerson/{p_id}')
+def delete_person(p_id: int):
+    person = [p for p in people if p['id'] == p_id]
+    people.remove(person[0])
+
+    with open('data/people.json', 'w') as f:
+        json.dump(people, f)
+
+    return person
+
+## Get person by ID
 @app.get('/person/{p_id}', status_code=200)
 def get_person(p_id: int):
     person = [p for p in people if p['id'] == p_id]
